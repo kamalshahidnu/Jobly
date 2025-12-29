@@ -1,6 +1,10 @@
 """Coordinator for managing agent execution and workflow."""
 
-from typing import Dict, Any, List
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Dict, List
+
 from ..agents.base import BaseAgent
 
 
@@ -30,17 +34,38 @@ class AgentCoordinator:
         Returns:
             Final workflow result
         """
-        # TODO: Implement workflow execution
-        result = input_data
+        result: Dict[str, Any] = input_data or {}
         for agent_name in workflow:
             if agent_name in self.agents:
                 agent = self.agents[agent_name]
-                result = await agent.execute(result)
-                self.execution_history.append({
-                    "agent": agent_name,
-                    "result": result
-                })
-        return result
+                started_at = datetime.utcnow().isoformat(timespec="seconds")
+                try:
+                    result = await agent.execute(result)
+                    status = "success"
+                except Exception as exc:
+                    result = {"status": "error", "error": str(exc), "agent": agent_name}
+                    status = "error"
+
+                self.execution_history.append(
+                    {
+                        "agent": agent_name,
+                        "status": status,
+                        "started_at": started_at,
+                        "finished_at": datetime.utcnow().isoformat(timespec="seconds"),
+                        "result": result,
+                    }
+                )
+            else:
+                self.execution_history.append(
+                    {
+                        "agent": agent_name,
+                        "status": "skipped",
+                        "started_at": datetime.utcnow().isoformat(timespec="seconds"),
+                        "finished_at": datetime.utcnow().isoformat(timespec="seconds"),
+                        "result": {"status": "skipped", "reason": "agent not registered"},
+                    }
+                )
+        return result or {}
 
     def get_agent(self, name: str) -> BaseAgent:
         """Get agent by name.

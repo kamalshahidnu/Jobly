@@ -15,7 +15,8 @@ from .commands import (
 @click.version_option(version="0.1.0")
 def cli():
     """Jobly - AI-powered job search automation."""
-    pass
+    # Command group entrypoint.
+    return None
 
 
 # Register command groups

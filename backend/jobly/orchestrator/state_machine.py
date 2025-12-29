@@ -32,6 +32,20 @@ class StateMachine:
         self.current_state = initial_state
         self.state_history = [initial_state]
         self.context: Dict[str, Any] = {}
+        self._allowed_transitions: Dict[WorkflowState, set[WorkflowState]] = {
+            WorkflowState.INIT: {WorkflowState.PROFILE_PARSING, WorkflowState.JOB_SEARCH, WorkflowState.ERROR},
+            WorkflowState.PROFILE_PARSING: {WorkflowState.JOB_SEARCH, WorkflowState.ERROR},
+            WorkflowState.JOB_SEARCH: {WorkflowState.JOB_RANKING, WorkflowState.ERROR},
+            WorkflowState.JOB_RANKING: {WorkflowState.DOCUMENT_PREP, WorkflowState.ERROR},
+            WorkflowState.DOCUMENT_PREP: {WorkflowState.CONTACT_DISCOVERY, WorkflowState.APPLICATION, WorkflowState.ERROR},
+            WorkflowState.CONTACT_DISCOVERY: {WorkflowState.OUTREACH, WorkflowState.ERROR},
+            WorkflowState.OUTREACH: {WorkflowState.APPLICATION, WorkflowState.ERROR},
+            WorkflowState.APPLICATION: {WorkflowState.INTERVIEW, WorkflowState.COMPLETE, WorkflowState.ERROR},
+            WorkflowState.INTERVIEW: {WorkflowState.OFFER, WorkflowState.COMPLETE, WorkflowState.ERROR},
+            WorkflowState.OFFER: {WorkflowState.COMPLETE, WorkflowState.ERROR},
+            WorkflowState.COMPLETE: {WorkflowState.INIT},
+            WorkflowState.ERROR: {WorkflowState.INIT},
+        }
 
     def transition(self, new_state: WorkflowState, context: Optional[Dict[str, Any]] = None) -> bool:
         """Transition to a new state.
@@ -43,7 +57,8 @@ class StateMachine:
         Returns:
             Success status
         """
-        # TODO: Add state transition validation
+        if not self.can_transition_to(new_state):
+            return False
         self.current_state = new_state
         self.state_history.append(new_state)
         if context:
@@ -59,8 +74,10 @@ class StateMachine:
         Returns:
             Whether transition is valid
         """
-        # TODO: Implement transition validation rules
-        return True
+        allowed = self._allowed_transitions.get(self.current_state)
+        if not allowed:
+            return False
+        return target_state in allowed
 
     def get_current_state(self) -> WorkflowState:
         """Get current workflow state.

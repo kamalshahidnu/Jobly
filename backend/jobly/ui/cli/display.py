@@ -5,6 +5,7 @@ from typing import List, Dict, Any
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+import time
 
 
 console = Console()
@@ -108,8 +109,10 @@ def display_progress(message: str, steps: int = None):
     """
     if steps:
         with console.status(f"[bold green]{message}...") as status:
-            # This would be used with actual progress tracking
-            pass
+            # Simple progress animation; real progress hooks can replace this later.
+            for idx in range(steps):
+                status.update(f"[bold green]{message}... ({idx + 1}/{steps})")
+                time.sleep(0.05)
     else:
         console.print(f"[bold green]⏳[/bold green] {message}...")
 
