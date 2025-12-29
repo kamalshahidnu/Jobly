@@ -1,0 +1,92 @@
+[tool.poetry]
+name = "jobly"
+version = "0.1.0"
+description = "AI-powered job search automation platform"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "jobly"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+pydantic = "^2.5.3"
+pydantic-settings = "^2.1.0"
+sqlalchemy = "^2.0.25"
+httpx = "^0.26.0"
+python-multipart = "^0.0.6"
+
+# AI/LLM
+openai = "^1.10.0"
+anthropic = "^0.18.0"
+
+# Data processing
+pandas = "^2.1.4"
+numpy = "^1.26.3"
+
+# Document processing
+pypdf2 = "^3.0.1"
+python-docx = "^1.1.0"
+reportlab = "^4.0.9"
+
+# Email
+google-auth = "^2.27.0"
+google-auth-oauthlib = "^1.2.0"
+google-auth-httplib2 = "^0.2.0"
+google-api-python-client = "^2.116.0"
+
+# Web scraping
+beautifulsoup4 = "^4.12.3"
+requests = "^2.31.0"
+selenium = "^4.17.2"
+
+# Validation
+email-validator = "^2.1.0.post1"
+
+# CLI
+click = "^8.1.7"
+rich = "^13.7.0"
+
+# Streamlit UI
+streamlit = "^1.30.0"
+
+# Async
+aiohttp = "^3.9.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.3"
+pytest-cov = "^4.1.0"
+black = "^24.1.1"
+ruff = "^0.1.14"
+mypy = "^1.8.0"
+
+[tool.poetry.scripts]
+jobly = "jobly.ui.cli.main:cli"
+jobly-api = "jobly.api.main:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=jobly --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
