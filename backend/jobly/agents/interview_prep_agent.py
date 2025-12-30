@@ -21,6 +21,16 @@ class InterviewPrepAgent(BaseAgent):
         Returns:
             Interview prep materials and tips
         """
+        # Try LLM-based generation first
+        if self.llm and self.llm.is_available():
+            try:
+                prep_materials = await self._generate_with_llm(input_data)
+                self.state["last_prep"] = prep_materials
+                return {"status": "success", "prep_materials": {"interviews": prep_materials}}
+            except Exception as e:
+                print(f"LLM generation failed: {e}. Falling back to template.")
+
+        # Fallback: template-based generation
         interviews = input_data.get("interviews") if isinstance(input_data, dict) else input_data
         interviews = interviews if isinstance(interviews, list) else [input_data]
 
@@ -153,3 +163,76 @@ class InterviewPrepAgent(BaseAgent):
 
         self.state["last_prep"] = prep_materials
         return {"status": "success", "prep_materials": {"interviews": prep_materials}}
+
+    async def _generate_with_llm(self, input_data: Dict[str, Any]) -> list:
+        """Generate interview prep using LLM.
+
+        Args:
+            input_data: Interview and profile details
+
+        Returns:
+            List of prep materials
+        """
+        interviews = input_data.get("interviews") if isinstance(input_data, dict) else input_data
+        interviews = interviews if isinstance(interviews, list) else [input_data]
+
+        prep_materials = []
+        for item in interviews:
+            interview = item if isinstance(item, dict) else {}
+            job_title = str(interview.get("job_title") or interview.get("title") or "Role").strip()
+            company = str(interview.get("company") or "Company").strip()
+            interview_type = str(interview.get("interview_type") or interview.get("type") or "").strip()
+            job_description = str(interview.get("job_description") or interview.get("description") or "").strip()
+
+            user_profile = interview.get("user_profile")
+            if user_profile is None and isinstance(input_data, dict):
+                user_profile = input_data.get("user_profile")
+
+            system_prompt = """You are an expert interview coach with 15+ years of experience helping candidates prepare for technical and behavioral interviews.
+Generate comprehensive, tailored interview preparation materials that include:
+- Likely behavioral and technical questions based on the role
+- Specific talking points highlighting the candidate's relevant experience
+- Questions the candidate should ask the interviewer
+- Company research recommendations
+- Suggested answer frameworks using STAR method"""
+
+            user_prompt = f"""Generate interview preparation materials for:
+
+JOB DETAILS:
+- Title: {job_title}
+- Company: {company}
+- Interview Type: {interview_type or 'General'}
+- Job Description: {job_description or 'Not provided'}
+
+CANDIDATE PROFILE:
+{user_profile if user_profile else 'No profile provided'}
+
+Provide comprehensive interview prep in JSON format with these fields:
+- likely_questions: {{behavioral: [...], technical: [...], company_specific: [...]}}
+- suggested_answers: [{{question, answer}}]
+- questions_for_interviewer: [...]
+- talking_points: [...]
+- company_research: [...]"""
+
+            response = await self.llm.acomplete(user_prompt, system=system_prompt, temperature=0.7)
+
+            # Try to parse JSON response, fall back to structured parsing if needed
+            import json
+            try:
+                prep_data = json.loads(response)
+                prep_materials.append({
+                    "job_title": job_title,
+                    "company": company,
+                    "interview_type": interview_type,
+                    **prep_data
+                })
+            except json.JSONDecodeError:
+                # LLM didn't return JSON, create structured response
+                prep_materials.append({
+                    "job_title": job_title,
+                    "company": company,
+                    "interview_type": interview_type,
+                    "prep_content": response
+                })
+
+        return prep_materials

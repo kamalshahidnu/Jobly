@@ -19,6 +19,15 @@ class OutreachWriterAgent(BaseAgent):
         Returns:
             Personalized outreach message
         """
+        # Try LLM-based generation first
+        if self.llm and self.llm.is_available():
+            try:
+                message = await self._generate_with_llm(input_data)
+                return {"status": "success", "message": message}
+            except Exception as e:
+                print(f"LLM generation failed: {e}. Falling back to template.")
+
+        # Fallback: template-based generation
         contact = input_data.get("contact") or {}
         contact = contact if isinstance(contact, dict) else {}
 
@@ -98,3 +107,46 @@ class OutreachWriterAgent(BaseAgent):
 
         message = "\n\n".join(message_parts)
         return {"status": "success", "message": message}
+
+    async def _generate_with_llm(self, input_data: Dict[str, Any]) -> str:
+        """Generate outreach message using LLM.
+
+        Args:
+            input_data: Contact and profile information
+
+        Returns:
+            Generated outreach message
+        """
+        contact = input_data.get("contact", {}) or {}
+        profile = input_data.get("profile", {}) or {}
+
+        system_prompt = """You are an expert at crafting professional, personalized networking messages.
+Your messages should:
+- Be concise (3-4 short paragraphs)
+- Sound genuine and human, not salesy
+- Show you've done your research
+- Make a clear, respectful ask
+- Build rapport without being overly familiar"""
+
+        user_prompt = f"""Write a personalized networking message:
+
+CONTACT INFORMATION:
+- Name: {contact.get('name', 'there')}
+- Position: {contact.get('position', '') or contact.get('title', '')}
+- Company: {contact.get('company', '')}
+
+SENDER PROFILE:
+- Name: {profile.get('name', '')}
+- Background: {profile.get('headline', '') or profile.get('title', '')}
+- Skills: {', '.join(profile.get('skills', [])[:5])}
+
+CONTEXT:
+- Mutual Connection: {input_data.get('mutual_connection', 'None')}
+- Interest Area: {input_data.get('interest', '') or input_data.get('focus', '')}
+- Recent Work: {input_data.get('recent_work', '') or input_data.get('recent_project', '')}
+- Additional Context: {input_data.get('context', '') or contact.get('notes', '')}
+- Call to Action: {input_data.get('call_to_action', 'Request a brief informational chat')}
+
+Write a warm, professional networking message that establishes connection and makes a respectful ask."""
+
+        return await self.llm.acomplete(user_prompt, system=system_prompt, temperature=0.8)

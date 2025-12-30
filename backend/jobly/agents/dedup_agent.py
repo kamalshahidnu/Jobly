@@ -14,7 +14,7 @@ class DedupAgent(BaseAgent):
         """Remove duplicate job postings.
 
         Args:
-            input_data: List of job postings
+            input_data: Dict containing a `jobs` list (or a raw list of jobs)
 
         Returns:
             Deduplicated list of jobs
@@ -36,17 +36,17 @@ class DedupAgent(BaseAgent):
             job_id = _get_value(job, "id")
             title = _get_value(job, "title")
             company = _get_value(job, "company")
-            location = _get_value(job, "location")
 
             if url:
                 key = f"url:{_normalize(url)}"
             elif job_id:
                 key = f"id:{_normalize(job_id)}"
             else:
+                # Composite key intentionally ignores location to treat a posting as the same job
+                # across different scraped locations/variants.
                 key_parts = (
                     _normalize(title) if title else "",
                     _normalize(company) if company else "",
-                    _normalize(location) if location else "",
                 )
                 key = f"composite:{'|'.join(key_parts)}"
 
@@ -56,4 +56,5 @@ class DedupAgent(BaseAgent):
             seen.add(key)
             unique_jobs.append(job)
 
-        return {"status": "success", "unique_jobs": unique_jobs}
+        # Keep both keys for compatibility: tests expect `deduplicated_jobs`.
+        return {"status": "success", "deduplicated_jobs": unique_jobs, "unique_jobs": unique_jobs}

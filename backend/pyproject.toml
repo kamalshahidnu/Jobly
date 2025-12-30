@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "jobly"
-version = "0.1.0"
-description = "AI-powered job search automation platform"
+version = "0.3.0"
+description = "AI-powered job search automation platform with authentication and approval workflows"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
 packages = [{include = "jobly"}]
@@ -15,6 +15,10 @@ pydantic-settings = "^2.1.0"
 sqlalchemy = "^2.0.25"
 httpx = "^0.26.0"
 python-multipart = "^0.0.6"
+
+# Authentication
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+bcrypt = "^4.0.1"
 
 # AI/LLM
 openai = "^1.10.0"

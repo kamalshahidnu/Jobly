@@ -1,16 +1,15 @@
-"""FastAPI application main entry point (disabled for Phase 1)."""
+"""FastAPI application main entry point."""
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routes import jobs, profile, outreach, documents, analytics, agents
-
-# This will be enabled in Phase 2
-# For now, we're focusing on Streamlit UI
+from .routes import jobs, profile, outreach, documents, analytics, agents, auth, approvals
 
 app = FastAPI(
     title="Jobly API",
-    description="AI-powered job search automation platform",
-    version="0.1.0",
+    description="AI-powered job search automation platform with multi-user authentication and approval workflows",
+    version="0.3.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
 )
 
 # CORS middleware
@@ -23,6 +22,8 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router, prefix="/api/v1")
+app.include_router(approvals.router, prefix="/api/v1")
 app.include_router(jobs.router, prefix="/api/v1/jobs", tags=["jobs"])
 app.include_router(profile.router, prefix="/api/v1/profile", tags=["profile"])
 app.include_router(outreach.router, prefix="/api/v1/outreach", tags=["outreach"])

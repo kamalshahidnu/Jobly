@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
+from ..utils.llm import get_llm_client, LLMClient
 
 
 class BaseAgent(ABC):
@@ -17,6 +18,17 @@ class BaseAgent(ABC):
         self.name = name
         self.config = config or {}
         self.state: Dict[str, Any] = {}
+
+        # Initialize LLM client if available
+        self.llm: Optional[LLMClient] = None
+        try:
+            self.llm = get_llm_client(
+                provider=config.get("llm_provider") if config else None,
+                model=config.get("llm_model") if config else None,
+            )
+        except Exception:
+            # LLM not available, agents can fall back to deterministic logic
+            pass
 
     @abstractmethod
     async def execute(self, input_data: Dict[str, Any]) -> Dict[str, Any]:
