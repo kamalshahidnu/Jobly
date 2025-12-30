@@ -51,9 +51,6 @@ email-validator = "^2.1.0.post1"
 click = "^8.1.7"
 rich = "^13.7.0"
 
-# Streamlit UI
-streamlit = "^1.30.0"
-
 # Async
 aiohttp = "^3.9.1"
 

@@ -10,31 +10,34 @@ Jobly is an intelligent job search automation system that uses 17 specialized AI
 ## ✨ Features
 
 - 🤖 **17 AI Agents** - Specialized agents for every job search task
+- 🔐 **Multi-User Authentication** - JWT tokens with secure password hashing
 - 📄 **Resume Parsing** - Automatically extract profile from your resume
-- 🔍 **Multi-Source Job Search** - Search LinkedIn, Indeed, Glassdoor, and more
-- 🎯 **Smart Job Ranking** - AI matches jobs to your profile
-- ✍️ **Document Generation** - Auto-tailor resumes and cover letters
-- 🤝 **Networking Automation** - Discover contacts and craft outreach messages
-- 📊 **Application Tracking** - Monitor all your applications in one place
-- 📈 **Analytics Dashboard** - Get insights on your job search performance
-- 🔔 **Email Monitoring** - Track responses and follow-ups
+- 🔍 **Multi-Source Job Search** - Search LinkedIn, Indeed, Glassdoor
+- 🎯 **Semantic Job Matching** - Vector-based matching using sentence-transformers
+- ✍️ **Document Generation** - AI-powered cover letters and resume tailoring
+- ✅ **Approval Workflows** - Human-in-the-loop gates for critical actions
+- 📊 **Application Tracking** - Monitor all applications in one place
+- 📈 **Analytics Dashboard** - Real-time insights and metrics
+- 🔔 **Email Monitoring** - Gmail integration with OAuth2
 - 🎤 **Interview Prep** - AI-generated preparation materials
+- 🐳 **Docker Deployment** - Containerized for easy deployment
 
 ## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────┐
-│       Streamlit UI (Phase 1)        │
-│   or React Frontend (Phase 2)       │
+│   React + TypeScript Frontend       │
+│   Material-UI | React Router        │
 └──────────────┬──────────────────────┘
-               │
+               │ REST API
 ┌──────────────▼──────────────────────┐
-│         Services Layer              │
-│  Profile | Jobs | Outreach | Docs   │
+│      FastAPI Backend (Python)       │
+│  Authentication | Routes | CORS     │
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
 │    17 Specialized AI Agents         │
+│  + Approval Gates & Workflows       │
 └──────────────┬──────────────────────┘
                │
 ┌──────────────▼──────────────────────┐
@@ -46,41 +49,59 @@ Jobly is an intelligent job search automation system that uses 17 specialized AI
 
 ### Prerequisites
 
-- Python 3.10 or higher
+- Python 3.11 or higher
+- Node.js 18+
 - Poetry (for dependency management)
 - OpenAI or Anthropic API key
 
-### Installation
+### Local Development
 
+1. **Clone the repository:**
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/jobly.git
-cd jobly
-
-# Install dependencies
-cd backend
-poetry install
-
-# Copy environment template
-cp ../.env.example ../.env
-# Edit .env and add your API keys
-
-# Initialize database
-poetry run python ../scripts/setup_db.py
-
-# Run Streamlit UI
-poetry run streamlit run jobly/ui/streamlit/app.py
+cd Jobly
 ```
 
-Visit `http://localhost:8501` to access the Jobly interface.
+2. **Set up environment:**
+```bash
+cp .env.example .env
+# Edit .env with your API keys
+```
+
+3. **Start the backend:**
+```bash
+cd backend
+poetry install
+poetry run uvicorn jobly.api.main:app --reload
+```
+
+4. **Start the frontend (in a new terminal):**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+5. **Access the application:**
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
 ### Using Docker
 
 ```bash
-# Build and run with Docker Compose
-docker-compose -f docker/docker-compose.streamlit.yml up
+# Build and start all services
+docker-compose up -d
 
-# Access at http://localhost:8501
+# Access at:
+# - Frontend: http://localhost
+# - Backend: http://localhost:8000
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
 ```
 
 ## 📖 Documentation
@@ -88,7 +109,6 @@ docker-compose -f docker/docker-compose.streamlit.yml up
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [AI Agents Guide](docs/AGENTS.md)
 - [API Reference](docs/API.md)
-- [Streamlit Setup](docs/STREAMLIT_SETUP.md)
 - [React Migration Guide](docs/REACT_MIGRATION.md)
 
 ## 🎯 Usage
@@ -167,23 +187,36 @@ poetry run mypy jobly
 
 ## 🗺️ Roadmap
 
-### Phase 1: Streamlit UI (Current)
-- ✅ Core agent framework
-- ✅ Streamlit interface
-- ✅ Basic workflow automation
-- 🔄 Advanced features
+### Phase 1: Core Backend ✅
+- ✅ 17 AI agent framework
+- ✅ LLM integration (OpenAI + Anthropic)
+- ✅ Job board scrapers
+- ✅ Vector store with semantic search
+- ✅ Gmail OAuth2 integration
 
-### Phase 2: React Frontend
-- ⬜ FastAPI backend activation
-- ⬜ React TypeScript frontend
-- ⬜ Enhanced UX/UI
-- ⬜ Real-time updates
+### Phase 2: Authentication & Workflows ✅
+- ✅ JWT authentication system
+- ✅ Multi-user support
+- ✅ Approval gate workflows
+- ✅ FastAPI endpoints
+- ✅ Comprehensive test coverage
 
-### Phase 3: Advanced Features
-- ⬜ Multi-user support
-- ⬜ Company research agent
-- ⬜ Salary negotiation assistant
-- ⬜ Career path planning
+### Phase 3: React Frontend ✅
+- ✅ React + TypeScript + Material-UI
+- ✅ Authentication UI
+- ✅ Job search interface
+- ✅ Approval workflow UI
+- ✅ Dashboard with analytics
+- ✅ Docker deployment
+
+### Phase 4: Advanced Features (Next)
+- ⬜ Real-time notifications
+- ⬜ Email/SMS alerts
+- ⬜ Browser extension
+- ⬜ Mobile app (React Native)
+- ⬜ Advanced ML insights
+- ⬜ Calendar integration
+- ⬜ ATS system integration
 
 ## 🤝 Contributing
 
@@ -202,7 +235,7 @@ Jobly is a tool to assist with job searching. Always review AI-generated content
 Built with:
 - [OpenAI GPT-4](https://openai.com/)
 - [Anthropic Claude](https://www.anthropic.com/)
-- [Streamlit](https://streamlit.io/)
+- [React](https://react.dev/)
 - [FastAPI](https://fastapi.tiangolo.com/)
 
 ---

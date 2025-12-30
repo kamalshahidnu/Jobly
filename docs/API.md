@@ -44,6 +44,7 @@ Then visit:
 
 ### Notes
 
-- Phase 1 focuses on the Streamlit UI; the API is intentionally simple and may change.
+- The API is designed as a RESTful interface for the React frontend.
+- Authentication is required for all endpoints except `/auth/*`.
 - For persistence, the service layer uses a lightweight SQLite schema created automatically on connect.
 

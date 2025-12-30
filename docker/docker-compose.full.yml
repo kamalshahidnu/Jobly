@@ -27,25 +27,6 @@ services:
       - "3000:80"
     depends_on:
       - backend
-    environment:
-      - REACT_APP_API_URL=http://backend:8000
-    restart: unless-stopped
-    networks:
-      - jobly-network
-
-  streamlit:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.streamlit
-    ports:
-      - "8501:8501"
-    volumes:
-      - ../backend/jobly:/app/jobly
-      - ../data:/app/data
-    environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - DATABASE_URL=sqlite:////app/data/jobly.db
     restart: unless-stopped
     networks:
       - jobly-network

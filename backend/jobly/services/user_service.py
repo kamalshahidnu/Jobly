@@ -21,24 +21,9 @@ class UserService:
         self._ensure_users_table()
 
     def _ensure_users_table(self) -> None:
-        """Ensure users table exists."""
-        conn = self.store.connect()
-        try:
-            cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id TEXT PRIMARY KEY,
-                    email TEXT UNIQUE NOT NULL,
-                    name TEXT NOT NULL,
-                    phone TEXT,
-                    password_hash TEXT NOT NULL,
-                    created_at TEXT NOT NULL,
-                    is_active INTEGER DEFAULT 1
-                )
-            """)
-            conn.commit()
-        finally:
-            conn.close()
+        """Ensure auth-related user columns exist on the shared `users` table."""
+        # `SQLiteStore.connect()` creates the base schema (including `users`) and runs migrations.
+        self.store.connect()
 
     def create_user(self, user_data: UserCreate) -> User:
         """Create a new user.
@@ -60,28 +45,25 @@ class UserService:
         password_hash = hash_password(user_data.password)
         created_at = datetime.utcnow().isoformat()
 
-        conn = self.store.connect()
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                INSERT INTO users (user_id, email, name, phone, password_hash, created_at, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """,
-                (user_id, user_data.email, user_data.name, user_data.phone, password_hash, created_at, 1)
-            )
-            conn.commit()
+        self.store.connect()
+        self.store.execute(
+            """
+            INSERT INTO users (id, email, name, phone, password_hash, created_at, updated_at, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (user_id, user_data.email, user_data.name, user_data.phone, password_hash, created_at, created_at, 1)
+        )
+        if self.store.conn:
+            self.store.conn.commit()
 
-            return User(
-                user_id=user_id,
-                email=user_data.email,
-                name=user_data.name,
-                phone=user_data.phone,
-                created_at=datetime.fromisoformat(created_at),
-                is_active=True
-            )
-        finally:
-            conn.close()
+        return User(
+            user_id=user_id,
+            email=user_data.email,
+            name=user_data.name,
+            phone=user_data.phone,
+            created_at=datetime.fromisoformat(created_at),
+            is_active=True
+        )
 
     def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
         """Get user by email.
@@ -92,11 +74,10 @@ class UserService:
         Returns:
             User data if found
         """
-        result = self.store.fetch(
+        return self.store.fetch_one(
             "SELECT * FROM users WHERE email = ?",
             (email,)
         )
-        return result[0] if result else None
 
     def get_user_by_id(self, user_id: str) -> Optional[User]:
         """Get user by ID.
@@ -107,17 +88,15 @@ class UserService:
         Returns:
             User if found
         """
-        result = self.store.fetch(
-            "SELECT user_id, email, name, phone, created_at, is_active FROM users WHERE user_id = ?",
+        user_data = self.store.fetch_one(
+            "SELECT id, email, name, phone, created_at, is_active FROM users WHERE id = ?",
             (user_id,)
         )
 
-        if not result:
+        if not user_data:
             return None
-
-        user_data = result[0]
         return User(
-            user_id=user_data["user_id"],
+            user_id=user_data["id"],
             email=user_data["email"],
             name=user_data["name"],
             phone=user_data.get("phone"),
@@ -140,11 +119,13 @@ class UserService:
         if not user_data:
             return None
 
+        if not user_data.get("password_hash"):
+            return None
         if not verify_password(password, user_data["password_hash"]):
             return None
 
         return User(
-            user_id=user_data["user_id"],
+            user_id=user_data["id"],
             email=user_data["email"],
             name=user_data["name"],
             phone=user_data.get("phone"),
@@ -172,16 +153,13 @@ class UserService:
         set_clause = ", ".join([f"{k} = ?" for k in update_fields.keys()])
         values = list(update_fields.values()) + [user_id]
 
-        conn = self.store.connect()
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                f"UPDATE users SET {set_clause} WHERE user_id = ?",
-                values
-            )
-            conn.commit()
-        finally:
-            conn.close()
+        self.store.connect()
+        self.store.execute(
+            f"UPDATE users SET {set_clause} WHERE id = ?",
+            tuple(values)
+        )
+        if self.store.conn:
+            self.store.conn.commit()
 
         return self.get_user_by_id(user_id)
 
@@ -194,17 +172,14 @@ class UserService:
         Returns:
             Success status
         """
-        conn = self.store.connect()
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                "UPDATE users SET is_active = 0 WHERE user_id = ?",
-                (user_id,)
-            )
-            conn.commit()
-            return cursor.rowcount > 0
-        finally:
-            conn.close()
+        self.store.connect()
+        cursor = self.store.execute(
+            "UPDATE users SET is_active = 0 WHERE id = ?",
+            (user_id,)
+        )
+        if self.store.conn:
+            self.store.conn.commit()
+        return cursor.rowcount > 0
 
     def change_password(self, user_id: str, old_password: str, new_password: str) -> bool:
         """Change user password.
@@ -217,27 +192,24 @@ class UserService:
         Returns:
             Success status
         """
-        user_data = self.store.fetch(
-            "SELECT password_hash FROM users WHERE user_id = ?",
+        user_data = self.store.fetch_one(
+            "SELECT password_hash FROM users WHERE id = ?",
             (user_id,)
         )
 
         if not user_data:
             return False
 
-        if not verify_password(old_password, user_data[0]["password_hash"]):
+        if not verify_password(old_password, user_data["password_hash"]):
             return False
 
         new_hash = hash_password(new_password)
 
-        conn = self.store.connect()
-        try:
-            cursor = conn.cursor()
-            cursor.execute(
-                "UPDATE users SET password_hash = ? WHERE user_id = ?",
-                (new_hash, user_id)
-            )
-            conn.commit()
-            return True
-        finally:
-            conn.close()
+        self.store.connect()
+        self.store.execute(
+            "UPDATE users SET password_hash = ? WHERE id = ?",
+            (new_hash, user_id)
+        )
+        if self.store.conn:
+            self.store.conn.commit()
+        return True

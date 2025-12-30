@@ -99,23 +99,13 @@ This document summarizes all the features that have been successfully implemente
 - Supports thousands of documents efficiently
 - Memory-efficient batch processing
 
-### 5. Streamlit UI Integration (Example Complete)
+### 5. React Frontend (Complete)
 
-**Files Created:**
-- `backend/jobly/ui/streamlit/pages/2_💼_Jobs_Connected.py` (NEW)
-
-**Features:**
-- ✅ Complete backend integration example
-- ✅ Multi-source job search (Indeed, Glassdoor, LinkedIn)
-- ✅ Real-time progress indicators
-- ✅ Automatic deduplication
-- ✅ AI-powered job ranking
-- ✅ Multiple view modes (Cards, List, Table)
-- ✅ Job details expansion
-- ✅ Database persistence
-- ✅ Search parameter persistence
-- ✅ Statistics sidebar
-- ✅ Sorting and filtering
+**Frontend:**
+- ✅ React + TypeScript UI (Vite)
+- ✅ Auth (register/login) + protected routes
+- ✅ Jobs dashboard, approvals UI, profile management
+- ✅ Nginx SPA routing + `/api/*` proxy to FastAPI in Docker
 
 ### 6. Documentation (100% Complete)
 
@@ -165,7 +155,7 @@ This document summarizes all the features that have been successfully implemente
 - ✅ Data deduplication
 
 #### User Interface
-- ✅ Full Streamlit example page
+- ✅ React SPA (frontend)
 - ✅ Multiple view modes
 - ✅ Real-time updates
 - ✅ Progress indicators
@@ -343,7 +333,7 @@ This implementation demonstrates:
    - Copy `.env.example` to `.env`
    - Add API keys
    - Run `poetry install`
-   - Start Streamlit UI
+   - Start the FastAPI backend + React frontend
 
 2. **Short Term:**
    - Try job search functionality
@@ -371,7 +361,7 @@ This implementation demonstrates:
 - ✅ LinkedIn API client
 - ✅ Gmail/email integration
 - ✅ Vector store with semantic search
-- ✅ Streamlit UI example
+- ✅ React frontend (SPA)
 - ✅ Documentation (4 files)
 - ✅ Configuration templates
 - ✅ Example workflows

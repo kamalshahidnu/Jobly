@@ -7,15 +7,15 @@ Welcome to the Jobly documentation!
 1. [Architecture](ARCHITECTURE.md) - System architecture and design
 2. [Agents](AGENTS.md) - AI agent documentation
 3. [API](API.md) - API reference and endpoints
-4. [Streamlit Setup](STREAMLIT_SETUP.md) - Setting up the Streamlit UI
-5. [React Migration](REACT_MIGRATION.md) - Migrating to React frontend
+4. [React Migration](REACT_MIGRATION.md) - React frontend implementation details
 
 ## Quick Start
 
 ### Prerequisites
 
-- Python 3.10+
-- Poetry for dependency management
+- Python 3.11+
+- Node.js 18+
+- Docker & Docker Compose
 - OpenAI or Anthropic API key
 
 ### Installation
@@ -25,38 +25,49 @@ Welcome to the Jobly documentation!
 git clone https://github.com/yourusername/jobly.git
 cd jobly
 
-# Install dependencies
-cd backend
-poetry install
-
 # Set up environment variables
 cp .env.example .env
 # Edit .env with your API keys
 
-# Run Streamlit UI
-poetry run streamlit run jobly/ui/streamlit/app.py
+# Build and run with Docker
+docker-compose up -d
+
+# Access the application at:
+# Frontend: http://localhost
+# Backend API: http://localhost:8000
+# API Docs: http://localhost:8000/docs
 ```
 
-### Using Docker
+### Local Development
 
 ```bash
-# Build and run with docker-compose
-docker-compose -f docker/docker-compose.streamlit.yml up
+# Backend
+cd backend
+poetry install
+poetry run uvicorn jobly.api.main:app --reload
+
+# Frontend (in a new terminal)
+cd frontend
+npm install
+npm run dev
 ```
 
 ## Project Structure
 
 ```
 jobly/
-├── backend/          # Python backend
+├── backend/          # Python FastAPI backend
 │   ├── jobly/       # Main package
 │   │   ├── agents/  # 17 AI agents
+│   │   ├── api/     # FastAPI routes & endpoints
+│   │   ├── auth/    # Authentication & JWT
 │   │   ├── models/  # Data models
-│   │   ├── tools/   # Utility tools
 │   │   ├── services/# Service layer
-│   │   └── ui/      # User interfaces
+│   │   └── memory/  # SQLite storage
 │   └── tests/       # Tests
-├── frontend/        # React frontend (Phase 2)
+├── frontend/        # React + TypeScript UI
+│   ├── src/        # React components
+│   └── public/     # Static assets
 ├── docker/          # Docker configs
 ├── docs/            # Documentation
 └── data/            # Local data storage

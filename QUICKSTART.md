@@ -1,20 +1,19 @@
 # Jobly Quick Start Guide
 
-Get up and running with Jobly in 5 minutes!
+Get up and running with Jobly (React + FastAPI) in 5 minutes using Docker!
 
 ## Prerequisites
 
-- Python 3.10 or higher
-- Poetry (Python package manager)
+- Docker and Docker Compose
 - API key for Anthropic Claude or OpenAI (for AI features)
 
 ## Installation
 
-### 1. Clone and Setup
+### 1. Clone the Repository
 
 ```bash
-cd Jobly/backend
-poetry install
+git clone https://github.com/yourusername/jobly.git
+cd Jobly
 ```
 
 ### 2. Configure API Keys
@@ -38,154 +37,128 @@ Get API keys:
 ### 3. Run the Application
 
 ```bash
-# Start Streamlit UI (Recommended)
-cd jobly/ui/streamlit
-streamlit run app.py
+# Build and start services
+docker compose -f docker/docker-compose.full.yml up --build -d
+
+# Check status
+docker compose -f docker/docker-compose.full.yml ps
 ```
 
-Your browser should open to `http://localhost:8501`
+Access the application:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs
 
 ## First Steps
 
-### 1. Search for Jobs
+### 1. Create an Account
 
-1. Click on "💼 Jobs" in the sidebar
-2. Replace the default page with the connected version:
-   ```bash
-   cp pages/2_💼_Jobs_Connected.py pages/2_💼_Jobs.py
-   ```
-3. Restart Streamlit
-4. Enter search criteria (e.g., "Software Engineer", "Remote")
-5. Click "Search Jobs"
+1. Open http://localhost in your browser
+2. Click "Sign Up" or navigate to the Register page
+3. Enter your details (name, email, password)
+4. Click "Register"
+5. You'll be automatically logged in
+
+### 2. Search for Jobs
+
+1. Click on "Jobs" in the navigation
+2. Enter search criteria:
+   - Keywords (e.g., "Software Engineer", "Python Developer")
+   - Location (e.g., "Remote", "San Francisco, CA")
+   - Job type, experience level, etc.
+3. Click "Search Jobs"
 
 The system will:
-- Search Indeed (and optionally Glassdoor)
-- Remove duplicates
-- Rank jobs by fit
-- Save results to database
+- Search multiple job boards (Indeed, Glassdoor, LinkedIn)
+- Remove duplicates automatically
+- Rank jobs by fit based on your profile
+- Display results with key details
 
-### 2. Generate Documents
+### 3. Build Your Profile
 
-```python
-# Example: Generate cover letter
-import asyncio
-from jobly.agents.cover_letter_agent import CoverLetterAgent
+1. Click on "Profile" in the navigation
+2. Upload your resume (PDF or DOCX)
+3. The AI will automatically parse and extract:
+   - Skills and technologies
+   - Work experience
+   - Education
+   - Contact information
+4. Review and edit as needed
 
-async def generate():
-    agent = CoverLetterAgent()
-    result = await agent.execute({
-        "profile": {
-            "name": "John Doe",
-            "skills": ["Python", "React", "AWS"],
-            "experience_years": 5
-        },
-        "job": {
-            "title": "Senior Software Engineer",
-            "company": "TechCorp",
-            "description": "Looking for experienced engineer..."
-        }
-    })
-    print(result["cover_letter"])
+### 4. Generate Documents
 
-asyncio.run(generate())
-```
+1. Navigate to "Documents" page
+2. Select a job you want to apply to
+3. Choose document type:
+   - Cover Letter
+   - Tailored Resume
+4. Click "Generate with AI"
+5. Review and edit the generated document
+6. Approve or regenerate if needed
 
-### 3. Monitor Emails (Optional)
+### 5. Track Applications
 
-If you set up Gmail API:
+1. Go to "Jobs" page
+2. Click "Apply" on a job listing
+3. Upload required documents or use AI-generated ones
+4. Track application status in the dashboard
+5. Add notes and follow-up reminders
 
-```python
-from jobly.tools.gmail_client import GmailClient
+## Key Features
 
-gmail = GmailClient(credentials_path="path/to/credentials.json")
-emails = gmail.search_job_emails(days_back=30)
+### AI-Powered Automation
+- **17 Specialized AI Agents** - Each agent handles a specific task (job search, ranking, document generation, etc.)
+- **Multi-Source Job Search** - Search LinkedIn, Indeed, and Glassdoor simultaneously
+- **Semantic Matching** - Vector-based job matching using sentence transformers
+- **Document Generation** - AI-generated cover letters and tailored resumes
 
-for email in emails:
-    category = gmail.categorize_email(email)
-    print(f"{email['subject']} - {category}")
-```
+### Human-in-the-Loop
+- **Approval Gates** - Review and approve AI-generated content before sending
+- **Bulk Operations** - Approve multiple actions at once
+- **Custom Edits** - Edit any AI-generated content before approval
 
-## Example Workflows
-
-### Complete Job Search
-
-```python
-import asyncio
-from jobly.tools.job_boards.indeed_scraper import IndeedScraper
-from jobly.agents.dedup_agent import DedupAgent
-from jobly.agents.job_ranker_agent import JobRankerAgent
-
-async def search():
-    # Search Indeed
-    scraper = IndeedScraper()
-    jobs = scraper.search_jobs(
-        keywords="Python Developer",
-        location="Remote",
-        limit=30
-    )
-    print(f"Found {len(jobs)} jobs")
-
-    # Deduplicate
-    dedup = DedupAgent()
-    result = await dedup.execute({"jobs": jobs})
-    unique_jobs = result["deduplicated_jobs"]
-    print(f"{len(unique_jobs)} unique jobs")
-
-    # Rank by fit
-    ranker = JobRankerAgent()
-    result = await ranker.execute({
-        "jobs": unique_jobs,
-        "profile": {
-            "skills": ["Python", "FastAPI", "PostgreSQL"],
-            "experience_years": 5
-        }
-    })
-
-    # Display top matches
-    for job in result["ranked_jobs"][:5]:
-        print(f"{job['title']} at {job['company']} - Score: {job['match_score']}")
-
-asyncio.run(search())
-```
-
-### Semantic Job Search
-
-```python
-from jobly.memory.vector_store import VectorStore, add_job_to_vector_store, search_jobs_semantic
-
-# Initialize vector store (first time downloads model)
-vector_store = VectorStore()
-
-# Add jobs
-for job in jobs:
-    add_job_to_vector_store(vector_store, job)
-
-# Semantic search
-results = search_jobs_semantic(
-    vector_store,
-    query="machine learning engineer with python and tensorflow experience",
-    top_k=10
-)
-
-for job in results:
-    print(f"{job['title']} - Similarity: {job.get('similarity_score', 0):.2f}")
-```
+### Application Tracking
+- **Centralized Dashboard** - View all applications in one place
+- **Status Tracking** - Track applications through the entire process
+- **Interview Preparation** - AI-generated prep materials for each interview
+- **Analytics** - Insights into your job search performance
 
 ## Common Commands
 
-```bash
-# Run Streamlit UI
-cd backend/jobly/ui/streamlit
-streamlit run app.py
+### Docker Commands
 
-# Run FastAPI backend
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Rebuild after code changes
+docker-compose up -d --build
+
+# View running containers
+docker-compose ps
+```
+
+### Local Development
+
+```bash
+# Backend
 cd backend
+poetry install
 poetry run uvicorn jobly.api.main:app --reload
 
-# Run CLI
-poetry run jobly --help
+# Frontend
+cd frontend
+npm install
+npm run dev
 
 # Run tests
+cd backend
 poetry run pytest
 
 # Run with coverage
@@ -194,16 +167,24 @@ poetry run pytest --cov=jobly --cov-report=term-missing
 
 ## Troubleshooting
 
-### "No module named 'sentence_transformers'"
+### Cannot access frontend at localhost
 
-Install for semantic search:
-```bash
-poetry add sentence-transformers
-```
+1. Check if containers are running: `docker-compose ps`
+2. View logs: `docker-compose logs frontend`
+3. Restart services: `docker-compose restart`
 
-### "LLM client not configured"
+### "Registration failed" error
 
-Make sure you've set either `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in your `.env` file.
+1. Check backend logs: `docker-compose logs backend`
+2. Verify .env file has correct API keys
+3. Rebuild containers: `docker-compose up -d --build backend`
+
+### Backend API errors
+
+1. Make sure API keys are set in `.env`:
+   - `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`
+2. Check backend is running: `curl http://localhost:8000/health`
+3. View API docs: http://localhost:8000/docs
 
 ### Job search returns no results
 
@@ -212,105 +193,42 @@ Make sure you've set either `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` in your `.en
 3. Try different keywords
 4. Respect rate limits (wait between searches)
 
-### "Gmail client not authenticated"
+## What's Included
 
-See the Gmail API setup section in [IMPLEMENTATION_GUIDE.md](backend/IMPLEMENTATION_GUIDE.md).
-
-## What Works Now
-
-✅ **Core Features Implemented:**
-- AI-powered cover letter generation
-- Interview preparation materials
-- Networking message generation
-- Job board scraping (Indeed, Glassdoor)
-- Gmail email monitoring
-- Semantic job search
-- Job deduplication
-- Job ranking by fit
-- Vector-based search
-- Streamlit UI example
-
-## What's Next
-
-🚧 **In Progress:**
-- Full UI integration for all pages
-- Multi-user authentication
-- Approval gate workflows
-- Complete test coverage
-- Enhanced analytics
-
-See [IMPLEMENTATION_GUIDE.md](backend/IMPLEMENTATION_GUIDE.md) for detailed documentation.
+✅ **Fully Implemented:**
+- React + TypeScript frontend with Material-UI
+- JWT authentication and multi-user support
+- 17 specialized AI agents
+- Multi-source job search (LinkedIn, Indeed, Glassdoor)
+- Semantic job matching with vector search
+- AI-powered document generation (cover letters, resumes)
+- Approval gate workflows with human-in-the-loop
+- Application tracking and analytics dashboard
+- Docker deployment with Nginx
+- FastAPI backend with OpenAPI docs
 
 ## Getting Help
 
-1. Check [IMPLEMENTATION_GUIDE.md](backend/IMPLEMENTATION_GUIDE.md) for detailed docs
-2. Review example code in this guide
-3. Check agent implementations in `backend/jobly/agents/`
-4. Read docstrings in the code
-
-## Project Structure
-
-```
-backend/
-├── jobly/
-│   ├── agents/          # 17 AI agents (all implemented)
-│   ├── services/        # Business logic layer
-│   ├── tools/           # External integrations
-│   │   ├── job_boards/  # Indeed, Glassdoor, LinkedIn
-│   │   └── gmail_client.py
-│   ├── memory/          # Database and vector store
-│   ├── utils/           # LLM client and helpers
-│   ├── ui/              # Streamlit UI
-│   └── api/             # FastAPI routes
-├── tests/               # Test suite
-├── .env                 # Your configuration
-└── IMPLEMENTATION_GUIDE.md  # Detailed documentation
-```
-
-## Quick Examples by Use Case
-
-### "I want to search for jobs"
-→ Use the Streamlit Jobs page (see step 1 above)
-
-### "I need a cover letter"
-→ Use `CoverLetterAgent` (see example above)
-
-### "I want to track emails"
-→ Use `GmailClient` (see example above)
-
-### "I need interview prep"
-→ Use `InterviewPrepAgent`:
-```python
-from jobly.agents.interview_prep_agent import InterviewPrepAgent
-
-agent = InterviewPrepAgent()
-result = await agent.execute({
-    "interviews": [{
-        "job_title": "Senior Engineer",
-        "company": "TechCorp",
-        "job_description": "...",
-        "user_profile": {...}
-    }]
-})
-```
-
-### "I want semantic search"
-→ Use `VectorStore` (see example above)
-
-## Performance Tips
-
-- Job scraping can take 10-30 seconds per source
-- LLM responses take 2-5 seconds
-- Vector store searches are very fast (<100ms)
-- Use batch operations when possible
-- Respect rate limits to avoid blocking
+1. Check the [docs/](docs/) folder for detailed documentation
+2. View API documentation: http://localhost:8000/docs
+3. Review [REACT_MIGRATION.md](docs/REACT_MIGRATION.md) for frontend details
+4. Check [ARCHITECTURE.md](docs/ARCHITECTURE.md) for system design
+5. See [API.md](docs/API.md) for API reference
 
 ## Next Steps
 
-1. ✅ Complete this quick start
-2. 📖 Read [IMPLEMENTATION_GUIDE.md](backend/IMPLEMENTATION_GUIDE.md) for details
-3. 🎨 Customize the UI for your needs
-4. 🧪 Add tests for new features
-5. 🚀 Deploy to production
+1. ✅ Complete this quick start guide
+2. 📖 Explore the [documentation](docs/) for detailed information
+3. 🎯 Set up your profile and start searching for jobs
+4. 🤖 Let the AI agents work for you
+5. 📊 Track your progress in the analytics dashboard
+
+## Tips for Success
+
+- **Be specific in job searches** - Use detailed keywords and locations
+- **Review AI-generated content** - Always review before approving
+- **Keep your profile updated** - Better profile = better job matches
+- **Use approval gates** - Review bulk actions before submitting
+- **Track everything** - Use the dashboard to monitor progress
 
 Happy job hunting! 🎯

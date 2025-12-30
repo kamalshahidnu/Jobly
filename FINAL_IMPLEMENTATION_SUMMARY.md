@@ -455,7 +455,7 @@ pytest-cov = "^4.1.0"
 4. ✅ Jobs deduplicated automatically
 5. ✅ Jobs ranked by fit
 6. ✅ Saved to user's account
-7. ✅ Displayed in Streamlit UI
+7. ✅ Displayed in React UI
 
 ### Scenario 2: Application with Approval
 1. ✅ User finds interesting job
@@ -519,7 +519,7 @@ pytest-cov = "^4.1.0"
 - Complete authentication system (JWT + bcrypt)
 - Approval gate framework
 - Comprehensive test suite
-- Connected Streamlit UI example
+- React frontend (SPA)
 - Production-ready FastAPI
 - 7,000+ lines of new code
 - Full documentation

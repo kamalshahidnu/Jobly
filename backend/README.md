@@ -14,7 +14,7 @@ jobly/
 ├── orchestrator/    # Agent coordination
 ├── services/        # Business logic
 ├── tools/           # Utility tools
-├── ui/              # Streamlit & CLI
+├── ui/              # CLI
 └── utils/           # Helper functions
 ```
 
@@ -29,12 +29,6 @@ pip install -e .
 ```
 
 ## Running
-
-### Streamlit UI
-
-```bash
-poetry run streamlit run jobly/ui/streamlit/app.py
-```
 
 ### CLI
 

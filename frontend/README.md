@@ -1,31 +1,8 @@
-# Jobly Frontend (Phase 2)
+# Jobly Frontend
 
-This directory is reserved for the React-based frontend that will be built in Phase 2.
+React + TypeScript frontend for Jobly.
 
-## Phase 1: Streamlit UI
-
-For Phase 1, we're using Streamlit for the UI. See `backend/jobly/ui/streamlit/` for the current implementation.
-
-## Phase 2: React Frontend (Future)
-
-The React frontend will provide:
-- Modern, responsive UI
-- Better performance and UX
-- Advanced features and customization
-- Progressive Web App (PWA) capabilities
-
-### Planned Tech Stack
-
-- **Framework:** React 18 with TypeScript
-- **State Management:** Redux Toolkit or Zustand
-- **Styling:** Tailwind CSS
-- **API Client:** Axios with React Query
-- **Routing:** React Router v6
-- **Forms:** React Hook Form
-- **Charts:** Recharts or Chart.js
-- **Build Tool:** Vite
-
-### Getting Started (Future)
+## Getting started
 
 ```bash
 # Install dependencies
@@ -38,11 +15,11 @@ npm run dev
 npm run build
 ```
 
-## Migration Path
+## API integration
 
-When migrating from Streamlit to React:
+- **Dev**: defaults to `http://localhost:8000` unless you set `VITE_API_URL`
+- **Docker**: frontend uses same-origin requests (`/api/...`) and nginx proxies to the backend container
 
-1. The backend API (FastAPI) will be fully enabled
-2. Services layer remains unchanged (shared between Streamlit and React)
-3. Streamlit UI can be kept as an alternative interface
-4. Both UIs can coexist during transition period
+## Notes
+
+See `docs/REACT_MIGRATION.md` for background.

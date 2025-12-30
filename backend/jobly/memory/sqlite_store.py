@@ -85,6 +85,11 @@ class SQLiteStore:
         cursor = self.execute(query, params)
         return [dict(row) for row in cursor.fetchall()]
 
+    # Backwards-compatibility: older services used `fetch()` to mean "fetch all".
+    def fetch(self, query: str, params: tuple = ()) -> List[Dict[str, Any]]:
+        """Fetch all rows (alias for `fetch_all`)."""
+        return self.fetch_all(query, params)
+
     def commit(self) -> None:
         """Commit current transaction."""
         if self.conn:
@@ -95,6 +100,9 @@ class SQLiteStore:
 
         This is safe to call multiple times.
         """
+        # Users table is shared by profile + auth.
+        # We keep profile fields (location/skills/experience) and also support auth fields
+        # (password_hash/is_active).
         self.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
@@ -106,11 +114,14 @@ class SQLiteStore:
                 skills TEXT,
                 experience_years INTEGER,
                 resume_text TEXT,
+                password_hash TEXT,
+                is_active INTEGER DEFAULT 1,
                 created_at TEXT NOT NULL,
                 updated_at TEXT NOT NULL
             )
             """
         )
+        self._ensure_users_columns()
         self.execute(
             """
             CREATE TABLE IF NOT EXISTS jobs (
@@ -179,6 +190,24 @@ class SQLiteStore:
         self.execute("CREATE INDEX IF NOT EXISTS idx_apps_user ON applications(user_id)")
         self.execute("CREATE INDEX IF NOT EXISTS idx_docs_user ON documents(user_id)")
         self.commit()
+
+    def _ensure_users_columns(self) -> None:
+        """Add missing columns to `users` table for backwards-compatible migrations."""
+        # NOTE: SQLite can only ADD COLUMN; it cannot easily change constraints via ALTER.
+        existing = {row["name"] for row in self.fetch_all("PRAGMA table_info(users)")}
+        # Columns added after initial scaffolding.
+        wanted = {
+            "password_hash": "TEXT",
+            "is_active": "INTEGER DEFAULT 1",
+            "location": "TEXT",
+            "skills": "TEXT",
+            "experience_years": "INTEGER",
+            "resume_text": "TEXT",
+            "updated_at": "TEXT",
+        }
+        for col, ddl in wanted.items():
+            if col not in existing:
+                self.execute(f"ALTER TABLE users ADD COLUMN {col} {ddl}")
 
     @staticmethod
     def dumps(value: Any) -> Optional[str]:

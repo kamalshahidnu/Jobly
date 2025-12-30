@@ -10,17 +10,17 @@ Jobly is a multi-agent AI system for automating job search workflows. The archit
 ┌─────────────────────────────────────────────┐
 │          User Interfaces                    │
 │  ┌─────────────┐      ┌──────────────┐     │
-│  │  Streamlit  │      │     CLI      │     │
-│  │     UI      │      │  (Optional)  │     │
+│  │    React    │      │     CLI      │     │
+│  │  Frontend   │      │  (Optional)  │     │
 │  └──────┬──────┘      └──────┬───────┘     │
-│         │                    │              │
+│         │ REST API           │              │
 └─────────┼────────────────────┼──────────────┘
           │                    │
 ┌─────────┼────────────────────┼──────────────┐
-│         │  Services Layer    │              │
+│         │  FastAPI Backend   │              │
 │  ┌──────▼────────────────────▼───────┐     │
-│  │  Profile | Job | Outreach | Doc   │     │
-│  │  Service | Svc | Service  | Svc   │     │
+│  │  Auth | Profile | Job | Outreach  │     │
+│  │  JWT  | Service | Svc | Service   │     │
 │  └──────┬────────────────────┬───────┘     │
 │         │                    │              │
 └─────────┼────────────────────┼──────────────┘
@@ -49,11 +49,13 @@ Jobly is a multi-agent AI system for automating job search workflows. The archit
 
 ### 1. User Interfaces
 
-#### Streamlit UI (Phase 1)
-- Primary interface for Phase 1
-- Fast prototyping and iteration
-- Python-based, integrated with backend
-- 7 main pages: Dashboard, Jobs, Profile, Networking, Documents, Interviews, Analytics
+#### React Frontend
+- Modern React + TypeScript SPA with Material-UI
+- JWT-based authentication
+- Main pages: Dashboard, Jobs, Profile, Outreach, Documents, Interviews, Analytics
+- Approval workflows with human-in-the-loop gates
+- Real-time application tracking
+- Responsive design for desktop and mobile
 
 #### CLI (Optional)
 - Command-line interface for power users
@@ -114,13 +116,25 @@ Shared business logic used by all interfaces:
 
 ## Technology Stack
 
+### Backend
 - **Language:** Python 3.11+
-- **UI Framework:** Streamlit (Phase 1), React (Phase 2)
+- **Web Framework:** FastAPI
+- **Authentication:** JWT with bcrypt
 - **AI:** OpenAI GPT-4 or Anthropic Claude
 - **Database:** SQLite (dev), PostgreSQL (production)
 - **Async:** asyncio
 - **Testing:** pytest
-- **Deployment:** Docker
+
+### Frontend
+- **Framework:** React 18 + TypeScript
+- **UI Library:** Material-UI (MUI)
+- **Routing:** React Router
+- **HTTP Client:** Axios
+- **Build Tool:** Vite
+
+### Deployment
+- **Containerization:** Docker & Docker Compose
+- **Web Server:** Nginx (frontend proxy)
 
 ## Workflows
 

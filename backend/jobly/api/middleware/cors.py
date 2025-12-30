@@ -14,7 +14,6 @@ def setup_cors(app, origins: List[str] = None):
     if origins is None:
         origins = [
             "http://localhost:3000",  # React dev server
-            "http://localhost:8501",  # Streamlit default port
             "http://localhost:8000",  # FastAPI default port
         ]
 

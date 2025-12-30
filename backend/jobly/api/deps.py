@@ -1,6 +1,7 @@
 """FastAPI dependencies."""
 
 from typing import Generator
+from fastapi import Depends
 from ..memory.sqlite_store import SQLiteStore
 from ..services.job_service import JobService
 from ..services.profile_service import ProfileService
@@ -23,7 +24,7 @@ def get_db_store() -> Generator[SQLiteStore, None, None]:
         store.disconnect()
 
 
-def get_job_service(store: SQLiteStore = None) -> JobService:
+def get_job_service(store: SQLiteStore = Depends(get_db_store)) -> JobService:
     """Get job service dependency.
 
     Args:
@@ -32,12 +33,10 @@ def get_job_service(store: SQLiteStore = None) -> JobService:
     Returns:
         JobService instance
     """
-    if store is None:
-        store = SQLiteStore()
     return JobService(store)
 
 
-def get_profile_service(store: SQLiteStore = None) -> ProfileService:
+def get_profile_service(store: SQLiteStore = Depends(get_db_store)) -> ProfileService:
     """Get profile service dependency.
 
     Args:
@@ -46,12 +45,10 @@ def get_profile_service(store: SQLiteStore = None) -> ProfileService:
     Returns:
         ProfileService instance
     """
-    if store is None:
-        store = SQLiteStore()
     return ProfileService(store)
 
 
-def get_outreach_service(store: SQLiteStore = None) -> OutreachService:
+def get_outreach_service(store: SQLiteStore = Depends(get_db_store)) -> OutreachService:
     """Get outreach service dependency.
 
     Args:
@@ -60,12 +57,10 @@ def get_outreach_service(store: SQLiteStore = None) -> OutreachService:
     Returns:
         OutreachService instance
     """
-    if store is None:
-        store = SQLiteStore()
     return OutreachService(store)
 
 
-def get_document_service(store: SQLiteStore = None) -> DocumentService:
+def get_document_service(store: SQLiteStore = Depends(get_db_store)) -> DocumentService:
     """Get document service dependency.
 
     Args:
@@ -74,12 +69,10 @@ def get_document_service(store: SQLiteStore = None) -> DocumentService:
     Returns:
         DocumentService instance
     """
-    if store is None:
-        store = SQLiteStore()
     return DocumentService(store)
 
 
-def get_analytics_service(store: SQLiteStore = None) -> AnalyticsService:
+def get_analytics_service(store: SQLiteStore = Depends(get_db_store)) -> AnalyticsService:
     """Get analytics service dependency.
 
     Args:
@@ -88,6 +81,4 @@ def get_analytics_service(store: SQLiteStore = None) -> AnalyticsService:
     Returns:
         AnalyticsService instance
     """
-    if store is None:
-        store = SQLiteStore()
     return AnalyticsService(store)

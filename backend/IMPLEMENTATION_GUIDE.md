@@ -163,21 +163,9 @@ results = search_jobs_semantic(
 )
 ```
 
-### 5. Streamlit UI Integration ✅
+### 5. React Frontend ✅
 
-**Location:** `backend/jobly/ui/streamlit/pages/2_💼_Jobs_Connected.py`
-
-**Features:**
-- Full backend integration example
-- Real job search across multiple sources
-- Automatic deduplication
-- AI-powered job ranking
-- Multiple view modes (Cards, List, Table)
-- Job details expansion
-- Database persistence
-
-**To Use:**
-Replace `2_💼_Jobs.py` with `2_💼_Jobs_Connected.py` to enable full functionality.
+The Streamlit UI has been removed. All UI functionality is implemented in the React frontend under `frontend/`.
 
 ## 📋 Setup Instructions
 
@@ -239,10 +227,12 @@ LinkedIn's job search API requires partnership access. For development:
 
 ### 5. Run the Application
 
-#### Streamlit UI (Recommended)
+#### React Frontend
+
 ```bash
-cd backend/jobly/ui/streamlit
-streamlit run app.py
+cd frontend
+npm install
+npm run dev
 ```
 
 #### FastAPI Backend
@@ -479,7 +469,7 @@ cover_letter, resume = asyncio.run(generate_application_docs())
 ```
 ┌─────────────────────────────────────────────┐
 │           User Interfaces                    │
-│  (Streamlit UI, CLI, FastAPI REST API)      │
+│  (React UI, CLI, FastAPI REST API)          │
 └─────────────────┬───────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────┐
@@ -514,8 +504,8 @@ cover_letter, resume = asyncio.run(generate_application_docs())
 ### Email Integration
 - `backend/jobly/tools/gmail_client.py` - Gmail API client
 
-### UI Examples
-- `backend/jobly/ui/streamlit/pages/2_💼_Jobs_Connected.py` - Full integration example
+### UI
+- React frontend: `frontend/`
 
 ### Configuration
 - `backend/jobly/config/settings.py` - Application settings
