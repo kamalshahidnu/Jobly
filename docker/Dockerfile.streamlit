@@ -1,0 +1,29 @@
+# Dockerfile for Streamlit UI
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy backend code (Streamlit uses the backend)
+COPY backend/pyproject.toml backend/poetry.lock* ./
+
+# Install Poetry
+RUN pip install poetry
+
+# Install Python dependencies
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
+# Copy application code
+COPY backend/jobly ./jobly
+
+# Expose Streamlit port
+EXPOSE 8501
+
+# Run Streamlit application
+CMD ["streamlit", "run", "jobly/ui/streamlit/app.py", "--server.port=8501", "--server.address=0.0.0.0"]

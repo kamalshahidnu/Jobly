@@ -1,0 +1,60 @@
+services:
+  # Backend API Service
+  - type: web
+    name: jobly-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    region: oregon
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jobly-db
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: JWT_SECRET_KEY
+        generateValue: true  # Auto-generate secure secret
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
+      - key: APP_NAME
+        value: Jobly
+      - key: RATE_LIMIT_CALLS
+        value: 10
+      - key: RATE_LIMIT_WINDOW
+        value: 60.0
+      - key: INDEED_RATE_LIMIT
+        value: 2
+      - key: GLASSDOOR_RATE_LIMIT
+        value: 2
+      - key: LINKEDIN_RATE_LIMIT
+        value: 1
+
+  # Frontend Service
+  - type: web
+    name: jobly-frontend
+    env: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    region: oregon
+    plan: starter
+    buildCommand: |
+      echo "VITE_API_BASE_URL=https://jobly-backend.onrender.com" > .env.production
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: jobly-backend
+          property: host
+
+databases:
+  - name: jobly-db
+    databaseName: jobly
+    user: jobly
+    region: oregon
+    plan: starter
+    ipAllowList: []  # Allow all IPs (services connect via internal network)

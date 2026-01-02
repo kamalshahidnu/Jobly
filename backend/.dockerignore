@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Local data (will use S3 in production)
+data/
+logs/
+credentials/
+*.db
+*.sqlite
+*.sqlite3
+
+# Documentation
+*.md
+!README.md
+IMPLEMENTATION_GUIDE.md
+
+# Git
+.git/
+.gitignore
+.github/
+
+# Environment files (sensitive)
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.log
+*.tmp
+tmp/
+temp/

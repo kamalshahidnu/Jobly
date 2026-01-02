@@ -104,6 +104,29 @@ docker-compose logs -f
 docker-compose down
 ```
 
+## 🚀 Deployment
+
+Deploy Jobly to production on Render.com:
+
+```bash
+# 1. Push your code to GitHub
+git push origin main
+
+# 2. Deploy via Render Blueprint
+# - Sign up at render.com
+# - Connect GitHub repo
+# - Click "New +" → "Blueprint"
+# - Select your repo and apply
+
+# 3. Configure environment variables in Render dashboard
+```
+
+See detailed guides:
+- **Quick Start:** [DEPLOY_CHECKLIST.md](DEPLOY_CHECKLIST.md)
+- **Full Guide:** [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+**Estimated Cost:** $0 (free tier) or $21/month (paid tier)
+
 ## 📖 Documentation
 
 - [Architecture Overview](docs/ARCHITECTURE.md)

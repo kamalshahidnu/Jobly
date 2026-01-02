@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     job_dir: str = "./data/jobs"
     document_dir: str = "./data/documents"
 
+    # CORS Configuration
+    cors_origins: str = "*"  # Comma-separated list of allowed origins, or "*" for all
+
     class Config:
         env_file = ".env"
         case_sensitive = False
