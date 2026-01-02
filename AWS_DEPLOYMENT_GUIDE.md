@@ -172,12 +172,12 @@ If your frontend needs to upload files directly:
 **Step 2: Build**
 10. **Deployment settings**: Manual (for now; can enable automatic later)
 11. **Build settings**:
-    - **Configuration source**: Use a configuration file (we'll create it)
-    - OR select **Configure all settings here**
-    - **Runtime**: Python 3
-    - **Build command**: Leave empty
-    - **Start command**: `uvicorn jobly.api.main:app --host 0.0.0.0 --port 8000`
-    - **Port**: 8000
+    - **Recommended (most reliable for this monorepo)**:
+      - **Configuration source**: **Use a Dockerfile**
+      - **Dockerfile path**: `Dockerfile` (repo root)
+      - **Port**: `8000`
+    - **Alternative (source build)**:
+      - Use this only if you know how to set App Runner's **source directory** to `backend/` and install Poetry dependencies during build.
 12. Click **Next**
 
 **Step 3: Configure**
