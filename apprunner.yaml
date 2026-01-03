@@ -3,14 +3,16 @@ runtime: python311
 
 build:
   commands:
-    # Ensure we're in the backend directory (works whether App Runner starts from repo root or backend/)
-    - if [ -f pyproject.toml ]; then echo "Using backend/ as working directory"; else cd backend; fi
-    - pip install --no-cache-dir poetry==1.7.1
-    - poetry config virtualenvs.create false
-    - poetry install --only main --no-root --no-interaction --no-ansi
+    pre-build:
+      # If App Runner executes from repo root, switch into backend/. If already in backend/, do nothing.
+      - if [ -d backend ]; then cd backend; fi
+      - pip install --no-cache-dir poetry==1.7.1
+      - poetry config virtualenvs.create false
+    build:
+      - poetry install --only main --no-root --no-interaction --no-ansi
 
 run:
-  command: if [ -f pyproject.toml ]; then uvicorn jobly.api.main:app --host 0.0.0.0 --port 8000; else cd backend && uvicorn jobly.api.main:app --host 0.0.0.0 --port 8000; fi
+  command: sh -c 'if [ -d backend ]; then cd backend; fi; uvicorn jobly.api.main:app --host 0.0.0.0 --port 8000'
   network:
     port: 8000
 

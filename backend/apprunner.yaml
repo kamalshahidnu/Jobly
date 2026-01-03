@@ -3,10 +3,11 @@ runtime: python311
 
 build:
   commands:
-    # Install Poetry and backend dependencies
-    - pip install --no-cache-dir poetry==1.7.1
-    - poetry config virtualenvs.create false
-    - poetry install --only main --no-root --no-interaction --no-ansi
+    pre-build:
+      - pip install --no-cache-dir poetry==1.7.1
+      - poetry config virtualenvs.create false
+    build:
+      - poetry install --only main --no-root --no-interaction --no-ansi
 
 run:
   command: uvicorn jobly.api.main:app --host 0.0.0.0 --port 8000
