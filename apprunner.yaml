@@ -6,10 +6,16 @@ build:
     pre-build:
       # If App Runner executes from repo root, switch into backend/. If already in backend/, do nothing.
       - if [ -d backend ]; then cd backend; fi
-      - pip install --no-cache-dir poetry==1.7.1
+      - python -V
+      - python -m pip -V
+      - python -m pip install --upgrade pip
+      - python -m pip install --no-cache-dir poetry==1.7.1
+      - poetry --version
+      - pwd
+      - ls -la
       - poetry config virtualenvs.create false
     build:
-      - poetry install --only main --no-root --no-interaction --no-ansi
+      - poetry install --only main --no-root --no-interaction --no-ansi -vvv
 
 run:
   command: sh -c 'if [ -d backend ]; then cd backend; fi; uvicorn jobly.api.main:app --host 0.0.0.0 --port 8000'
